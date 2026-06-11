@@ -1,0 +1,25 @@
+---
+import Base from '@/layouts/Base.astro';
+import MisRecuerdos from '@/components/MisRecuerdos.tsx';
+import { getRecuerdosDeUsuario } from '@/lib/eventos.server';
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/entrar?next=/perfil');
+
+const grupos = await getRecuerdosDeUsuario(user.id);
+const total = grupos.reduce((acc, g) => acc + g.posts.length, 0);
+const alias = user.alias || user.name;
+---
+
+<Base title="Mi espacio — MISAS">
+  <section class="perfil-wrap">
+    <a href="/" class="cond text-xs uppercase tracking-ancho text-hueso-2/60 hover:text-sangre-viva">← Todas las misas</a>
+    <h1 class="stencil mt-6 text-5xl text-hueso titulo-sangre">MI ESPACIO</h1>
+    <p class="cond mt-2 text-sm uppercase tracking-ancho text-amarillo-luz/90">{alias}</p>
+    <p class="cond mt-1 text-xs uppercase tracking-ancho text-hueso-2/60">
+      {grupos.length} {grupos.length === 1 ? 'misa' : 'misas'} · {total} {total === 1 ? 'recuerdo' : 'recuerdos'}
+    </p>
+    <hr class="divisor-pintado my-8" />
+    <MisRecuerdos client:load grupos={grupos} />
+  </section>
+</Base>

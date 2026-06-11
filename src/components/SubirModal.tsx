@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import imageCompression from 'browser-image-compression';
 import { addFoto } from '@/lib/store';
 
 interface Props {
@@ -12,22 +13,19 @@ interface Props {
 type Paso = 'login' | 'modo' | 'foto' | 'historia' | 'listo';
 type Modo = 'foto' | 'recuerdo';
 
-const MUESTRAS = Array.from(
-  { length: 8 },
-  (_, i) => `https://picsum.photos/seed/subir-${i}/300/300?grayscale`,
-);
-
 export default function SubirModal({ slug, panoramica, logueado, fotoHabilitada, usuarioAlias = '' }: Props) {
   const [abierto, setAbierto] = useState(false);
   const [paso, setPaso] = useState<Paso>('login');
   const [modo, setModo] = useState<Modo>('recuerdo');
-  const [foto, setFoto] = useState<string | null>(null);
+  const [archivo, setArchivo] = useState<File | null>(null);
+  const [preview, setPreview] = useState('');
   const [alias, setAlias] = useState('');
   const [historia, setHistoria] = useState('');
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [here, setHere] = useState('/');
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setHere(window.location.pathname);
@@ -42,19 +40,35 @@ export default function SubirModal({ slug, panoramica, logueado, fotoHabilitada,
 
   function abrir() {
     setError('');
-    setFoto(null);
+    setArchivo(null);
+    setPreview('');
     setAlias(usuarioAlias);
     setHistoria('');
     setPos(null);
-    if (!logueado) {
-      setPaso('login');
-    } else if (fotoHabilitada) {
-      setPaso('modo');
-    } else {
+    if (!logueado) setPaso('login');
+    else if (fotoHabilitada) setPaso('modo');
+    else {
       setModo('recuerdo');
       setPaso('historia');
     }
     setAbierto(true);
+  }
+
+  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError('');
+    try {
+      const comprimida = await imageCompression(file, {
+        maxSizeMB: 0.35,
+        maxWidthOrHeight: 1600,
+        useWebWorker: true,
+      });
+      setArchivo(comprimida);
+      setPreview(URL.createObjectURL(comprimida));
+    } catch {
+      setError('No se pudo procesar esa imagen. Probá con otra.');
+    }
   }
 
   function onMap(e: React.MouseEvent<HTMLDivElement>) {
@@ -67,10 +81,31 @@ export default function SubirModal({ slug, panoramica, logueado, fotoHabilitada,
 
   async function confirmar() {
     const esRecuerdo = modo === 'recuerdo';
-    if (!historia.trim() || (!esRecuerdo && !foto)) return;
+    if (!historia.trim()) return;
+    if (!esRecuerdo && !archivo) {
+      setError('Elegí una foto.');
+      return;
+    }
     setEnviando(true);
     setError('');
     try {
+      let imagenKey: string | null = null;
+      if (!esRecuerdo && archivo) {
+        const up = await fetch('/api/upload-url', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ contentType: archivo.type }),
+        });
+        const updata = await up.json().catch(() => ({}));
+        if (!up.ok) throw new Error(updata.error || 'No se pudo preparar la subida.');
+        const put = await fetch(updata.url, {
+          method: 'PUT',
+          headers: { 'content-type': archivo.type },
+          body: archivo,
+        });
+        if (!put.ok) throw new Error('No se pudo subir la foto.');
+        imagenKey = updata.key;
+      }
       const res = await fetch('/api/posts', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -81,14 +116,14 @@ export default function SubirModal({ slug, panoramica, logueado, fotoHabilitada,
           alias: alias.trim(),
           x: pos?.x,
           y: pos?.y,
-          imagenKey: esRecuerdo ? null : foto,
+          imagenKey,
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'No se pudo guardar.');
       addFoto(slug, {
         id: data.id || `vos-${Date.now()}`,
-        src: esRecuerdo ? '' : (foto as string),
+        src: esRecuerdo ? '' : preview,
         alias: (alias.trim() || 'Vos') + ' · vos',
         historia: historia.trim(),
         x: pos ? pos.x : 10 + Math.round(Math.random() * 80),
@@ -179,18 +214,23 @@ export default function SubirModal({ slug, panoramica, logueado, fotoHabilitada,
                 <p className="mt-1 text-sm text-hueso-2/70">
                   Solo, con amigos o con toda tu banda: la que mejor cuente que estuvieron ahí.
                 </p>
-                <div className="subir-grid">
-                  {MUESTRAS.map((m) => (
-                    <button
-                      key={m}
-                      className={`subir-thumb${foto === m ? ' sel' : ''}`}
-                      onClick={() => setFoto(m)}
-                      style={{ backgroundImage: `url(${m})` }}
-                      aria-label="Elegir esta foto"
-                    />
-                  ))}
-                </div>
-                <button className="subir-cta" disabled={!foto} onClick={() => setPaso('historia')}>
+                <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
+                {preview ? (
+                  <button
+                    className="subir-preview"
+                    style={{ backgroundImage: `url(${preview})` }}
+                    onClick={() => fileRef.current?.click()}
+                    aria-label="Cambiar foto"
+                  >
+                    <span className="subir-preview-cambiar">cambiar</span>
+                  </button>
+                ) : (
+                  <button className="subir-elegir" onClick={() => fileRef.current?.click()}>
+                    📷 Elegí una foto de tu galería
+                  </button>
+                )}
+                {error && <p className="auth-error">{error}</p>}
+                <button className="subir-cta" disabled={!archivo} onClick={() => setPaso('historia')}>
                   Seguir
                 </button>
               </div>

@@ -77,3 +77,32 @@ export async function getEventoConPosts(slug: string): Promise<EventoDetalle | n
     fotos,
   };
 }
+
+export interface GrupoRecuerdos {
+  slug: string;
+  titulo: string;
+  posts: { id: string; tipo: string; historia: string; src: string }[];
+}
+
+export async function getRecuerdosDeUsuario(userId: string): Promise<GrupoRecuerdos[]> {
+  const filas = await db
+    .select({
+      id: posts.id,
+      tipo: posts.tipo,
+      historia: posts.historia,
+      imagenKey: posts.imagenKey,
+      slug: eventos.slug,
+      titulo: eventos.titulo,
+    })
+    .from(posts)
+    .innerJoin(eventos, eq(posts.eventoId, eventos.id))
+    .where(and(eq(posts.userId, userId), eq(posts.estado, 'visible')))
+    .orderBy(desc(posts.createdAt));
+
+  const map = new Map<string, GrupoRecuerdos>();
+  for (const f of filas) {
+    if (!map.has(f.slug)) map.set(f.slug, { slug: f.slug, titulo: f.titulo, posts: [] });
+    map.get(f.slug)!.posts.push({ id: f.id, tipo: f.tipo, historia: f.historia, src: urlDeImagen(f.imagenKey) });
+  }
+  return [...map.values()];
+}

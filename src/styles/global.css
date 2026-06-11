@@ -545,6 +545,44 @@ body {
   filter: grayscale(0);
   box-shadow: 0 0 0 2px rgba(231, 201, 92, 0.5);
 }
+.subir-elegir {
+  width: 100%;
+  margin-top: 14px;
+  padding: 28px 16px;
+  background: #0d0a0a;
+  border: 1px dashed rgba(231, 201, 92, 0.35);
+  color: #b8b09a;
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 14px;
+}
+.subir-elegir:hover {
+  border-color: #c1121f;
+  color: #e7c95c;
+}
+.subir-preview {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  aspect-ratio: 4 / 3;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(231, 201, 92, 0.4);
+}
+.subir-preview-cambiar {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 4px 10px;
+  background: rgba(10, 8, 8, 0.8);
+  color: #e7c95c;
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 11px;
+}
 .subir-cta {
   width: 100%;
   margin-top: 18px;
@@ -797,6 +835,82 @@ body {
 }
 .auth-alt a:hover {
   color: #c1121f;
+}
+
+/* ============================================================
+   PERFIL / MI ESPACIO
+   ============================================================ */
+.perfil-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+.perfil-vacio {
+  color: rgba(184, 176, 154, 0.8);
+  font-size: 15px;
+}
+.perfil-vacio a {
+  color: #e7c95c;
+}
+.perfil-grupos {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.perfil-evento {
+  display: inline-block;
+  font-size: 26px;
+  color: #e8e2d0;
+}
+.perfil-evento:hover {
+  color: #e7c95c;
+}
+.perfil-posts {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.perfil-post {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+}
+.perfil-vela {
+  flex: none;
+  font-size: 28px;
+  filter: drop-shadow(0 0 6px rgba(231, 201, 92, 0.5));
+}
+.perfil-img {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  object-fit: cover;
+  filter: grayscale(0.3);
+}
+.perfil-historia {
+  flex: 1;
+  min-width: 0;
+  color: rgba(232, 226, 208, 0.9);
+  font-size: 14px;
+}
+.perfil-borrar {
+  flex: none;
+  padding: 6px 12px;
+  font-family: 'Oswald', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 12px;
+  color: #b8b09a;
+  border: 1px solid rgba(232, 226, 208, 0.18);
+}
+.perfil-borrar:hover:not(:disabled) {
+  color: #c1121f;
+  border-color: #c1121f;
+}
+.perfil-borrar:disabled {
+  opacity: 0.5;
 }
 
 /* ============================================================
