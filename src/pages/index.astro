@@ -1,0 +1,84 @@
+---
+import Base from '@/layouts/Base.astro';
+import EventoCard from '@/components/EventoCard.astro';
+import ContadorAlmas from '@/components/ContadorAlmas.tsx';
+import { listarEventos } from '@/lib/eventos.server';
+
+const eventos = await listarEventos();
+const almasGlobales = eventos.reduce((acc, e) => acc + e.almas, 0);
+---
+
+<Base>
+  <!-- ===================== HERO ===================== -->
+  <section class="relative mx-auto max-w-5xl px-5 pt-20 pb-14 text-center sm:pt-28">
+    <p class="cond text-xs uppercase tracking-ancho text-sangre-viva animate-flicker sm:text-sm">
+      El archivo de los que estuvieron
+    </p>
+
+    <h1 class="stencil mt-4 text-[20vw] leading-[0.8] text-hueso sm:text-[150px]">
+      MI<span class="text-sangre-viva">S</span>AS
+    </h1>
+
+    <p class="cond mx-auto mt-3 max-w-xl text-base text-hueso-2/80 sm:text-lg">
+      Cada foto, una banda. Cada banda, una historia.
+      <span class="text-amarillo-luz">Todas juntas, la misa.</span>
+    </p>
+
+    <p class="stencil mx-auto mt-4 text-2xl text-amarillo-luz sm:text-3xl">
+      Para los graciosos y valientes.
+    </p>
+    <p class="mt-1 text-xs uppercase tracking-ancho text-hueso-2/45">
+      — el Indio
+    </p>
+
+    <div class="mt-10">
+      <ContadorAlmas
+        client:visible
+        valor={almasGlobales}
+        label="almas en el mosaico"
+        size="xl"
+      />
+    </div>
+
+    <p class="mx-auto mt-8 max-w-md text-sm leading-relaxed text-hueso-2/60">
+      Vení con tu banda, subí su foto al recital donde estuvieron y sumate a los que
+      <span class="text-hueso">nunca se van del todo</span>.
+    </p>
+
+    <a href="#misas" class="cond mt-8 inline-block border-b-2 border-sangre-viva pb-1 text-xs uppercase tracking-ancho text-hueso transition-colors hover:text-amarillo-luz">
+      Entrá a las misas ↓
+    </a>
+  </section>
+
+  <!-- ===================== CÓMO FUNCIONA ===================== -->
+  <section class="mx-auto max-w-4xl px-5 py-10">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      {[
+        { n: '1', t: 'Elegí la misa', d: 'Entrá al recital o homenaje donde estuviste.' },
+        { n: '2', t: 'Dejá tu marca', d: 'Subí tu foto con tu banda. ¿No querés subir foto? Dejá solo tu recuerdo de que estuviste.' },
+        { n: '3', t: 'Sé parte', d: 'Con foto o sin ella, encendés tu parte del mosaico del Indio y sumás una alma a la multitud.' },
+      ].map((p) => (
+        <div class="afiche p-5">
+          <span class="stencil text-4xl text-sangre-viva">{p.n}</span>
+          <h3 class="cond mt-2 text-lg uppercase tracking-brutal text-hueso">{p.t}</h3>
+          <p class="mt-1 text-sm text-hueso-2/70">{p.d}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- ===================== CATÁLOGO ===================== -->
+  <section id="misas" class="mx-auto max-w-6xl px-5 py-12">
+    <div class="mb-8 flex items-end justify-between">
+      <h2 class="stencil text-4xl text-hueso sm:text-5xl">LAS MISAS</h2>
+      <span class="cond text-xs uppercase tracking-ancho text-hueso-2/50">
+        {eventos.length} eventos · seguí sumando
+      </span>
+    </div>
+    <hr class="divisor-pintado mb-8" />
+
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {eventos.map((e) => <EventoCard evento={e} />)}
+    </div>
+  </section>
+</Base>

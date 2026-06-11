@@ -1,0 +1,9 @@
+node_modules
+dist
+.pglite
+.git
+.env
+.env.*
+.astro
+*.log
+.DS_Store

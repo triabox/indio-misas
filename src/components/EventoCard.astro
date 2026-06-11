@@ -1,0 +1,63 @@
+---
+import type { EventoVM } from '@/lib/eventos.server';
+import { ordenRevelado } from '@/lib/mosaico';
+import { formatNumero, TIPO_LABEL } from '@/lib/format';
+import { resolveImagen } from '@/lib/resolveImagen';
+
+interface Props {
+  evento: EventoVM;
+}
+
+const { evento } = Astro.props;
+
+const COLS = 26;
+const ROWS = 15;
+const TOTAL = COLS * ROWS;
+const fraccion = Math.min(1, evento.reveladas / evento.meta);
+const orden = ordenRevelado(evento.slug, TOTAL);
+const litCount = Math.round(fraccion * TOTAL);
+const lit = new Set(orden.slice(0, litCount));
+const pct = Math.round(fraccion * 100);
+const size = `${COLS * 100}% ${ROWS * 100}%`;
+const imagen = resolveImagen(evento.slug, evento.imagenObjetivo);
+---
+
+<a href={`/evento/${evento.slug}`} class="evento-card afiche group" aria-label={evento.titulo}>
+  <div
+    class="evento-mosaico"
+    style={`grid-template-columns:repeat(${COLS},1fr);grid-template-rows:repeat(${ROWS},1fr);background:#0a0a0a;`}
+  >
+    {
+      Array.from({ length: TOTAL }).map((_, i) => {
+        const col = i % COLS;
+        const row = Math.floor(i / COLS);
+        const pos = `${(col / (COLS - 1)) * 100}% ${(row / (ROWS - 1)) * 100}%`;
+        const on = lit.has(i);
+        return (
+          <i
+            style={`background-image:url(${imagen});background-size:${size};background-position:${pos};${on ? '' : 'filter:grayscale(1) brightness(0.38);'}`}
+          />
+        );
+      })
+    }
+  </div>
+
+  <div class="evento-overlay">
+    <span class="sello self-start mb-auto px-2 py-1 text-[10px] text-amarillo-luz">
+      {TIPO_LABEL[evento.tipo]}
+    </span>
+    <h3 class="stencil text-2xl sm:text-3xl text-hueso leading-none group-hover:text-amarillo-luz transition-colors">
+      {evento.titulo}
+    </h3>
+    <p class="cond mt-1 text-xs uppercase tracking-ancho text-hueso-2/80">
+      {evento.lugar} · {evento.ciudad} · {evento.fecha}
+    </p>
+    <div class="mt-2 flex items-baseline gap-2">
+      <span class="stencil text-xl text-sangre-viva">{formatNumero(evento.almas)}</span>
+      <span class="cond text-[11px] uppercase tracking-ancho text-hueso-2/60">almas</span>
+      <span class="cond ml-auto text-[11px] uppercase tracking-ancho text-amarillo/70">
+        {pct}% revelado →
+      </span>
+    </div>
+  </div>
+</a>

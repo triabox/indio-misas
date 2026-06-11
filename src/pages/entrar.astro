@@ -1,0 +1,17 @@
+---
+import Base from '@/layouts/Base.astro';
+import AuthForm from '@/components/AuthForm.tsx';
+
+if (Astro.locals.user) return Astro.redirect('/');
+const googleOn = !!process.env.GOOGLE_CLIENT_ID;
+const next = Astro.url.searchParams.get('next') || '/';
+---
+
+<Base title="Entrar — MISAS">
+  <section class="auth-wrap">
+    <a href="/" class="cond text-xs uppercase tracking-ancho text-hueso-2/60 hover:text-sangre-viva">← Volver</a>
+    <h1 class="stencil mt-6 text-5xl text-hueso titulo-sangre">VOLVÉ A LA MISA</h1>
+    <p class="cond mt-2 text-sm text-hueso-2/80">Entrá para seguir sumando tus recuerdos.</p>
+    <AuthForm client:load modo="entrar" googleOn={googleOn} next={next} />
+  </section>
+</Base>

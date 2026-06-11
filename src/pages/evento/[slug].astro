@@ -1,0 +1,99 @@
+---
+import Base from '@/layouts/Base.astro';
+import Mosaico from '@/components/Mosaico.tsx';
+import Panoramica from '@/components/Panoramica.tsx';
+import MuroHistorias from '@/components/MuroHistorias.tsx';
+import ContadorAlmas from '@/components/ContadorAlmas.tsx';
+import SubirModal from '@/components/SubirModal.tsx';
+import { getEventoConPosts } from '@/lib/eventos.server';
+import { TIPO_LABEL } from '@/lib/format';
+import { resolveImagen } from '@/lib/resolveImagen';
+
+const { slug } = Astro.params;
+const data = await getEventoConPosts(slug!);
+if (!data) {
+  return new Response(null, { status: 404, statusText: 'Misa no encontrada' });
+}
+const { evento, fotos } = data;
+const imagenObjetivo = resolveImagen(evento.slug, evento.imagenObjetivo);
+---
+
+<Base title={`${evento.titulo} — MISAS`} description={`${evento.titulo} · ${evento.lugar}, ${evento.ciudad}. ${evento.subtitulo}.`}>
+  <!-- back -->
+  <div class="mx-auto max-w-5xl px-5 pt-6">
+    <a href="/" class="cond text-xs uppercase tracking-ancho text-hueso-2/60 transition-colors hover:text-sangre-viva">
+      ← Todas las misas
+    </a>
+  </div>
+
+  <!-- ===================== HERO + MOSAICO ===================== -->
+  <section class="mx-auto max-w-5xl px-5 pt-6 text-center">
+    <span class="sello inline-block px-3 py-1 text-xs text-amarillo-luz">{TIPO_LABEL[evento.tipo]}</span>
+    <h1 class="stencil mt-4 text-5xl leading-none text-hueso sm:text-7xl">{evento.titulo}</h1>
+    <p class="cond mt-2 text-base text-amarillo-luz/90 sm:text-lg">{evento.subtitulo}</p>
+    <p class="cond mt-1 text-xs uppercase tracking-ancho text-hueso-2/70">
+      {evento.lugar} · {evento.ciudad} · {evento.fecha}
+    </p>
+
+    <div class="mt-8">
+      <ContadorAlmas
+        client:load
+        valor={evento.almas}
+        slug={evento.slug}
+        fotos={fotos}
+        label="almas que estuvieron"
+        size="lg"
+      />
+    </div>
+
+    <div class="mx-auto mt-10 max-w-3xl">
+      <Mosaico
+        client:load
+        slug={evento.slug}
+        imagenObjetivo={imagenObjetivo}
+        meta={evento.meta}
+        reveladas={evento.reveladas}
+        fotos={fotos}
+        almas={evento.almas}
+      />
+    </div>
+  </section>
+
+  <!-- ===================== PANORÁMICA ===================== -->
+  <section class="mx-auto max-w-5xl px-5 py-16">
+    <h2 class="stencil text-3xl text-hueso sm:text-4xl">ENCONTRATE EN LA MULTITUD</h2>
+    <p class="cond mt-1 mb-5 text-xs uppercase tracking-ancho text-hueso-2/60">
+      Hacé zoom, arrastrá y tocá los puntos para leer quién estaba ahí
+    </p>
+    <Panoramica
+      client:load
+      slug={evento.slug}
+      src={evento.panoramica}
+      fotos={fotos}
+      almas={evento.almas}
+    />
+  </section>
+
+  <!-- ===================== MURO ===================== -->
+  <section class="mx-auto max-w-6xl px-5 pb-20">
+    <h2 class="stencil text-3xl text-hueso sm:text-4xl">LAS HISTORIAS</h2>
+    <p class="cond mt-1 mb-6 text-xs uppercase tracking-ancho text-hueso-2/60">
+      Lo que dejó cada uno de los que fue
+    </p>
+    <MuroHistorias
+      client:load
+      slug={evento.slug}
+      fotos={fotos}
+      almas={evento.almas}
+    />
+  </section>
+
+  <SubirModal
+    client:load
+    slug={evento.slug}
+    panoramica={evento.panoramica}
+    logueado={!!Astro.locals.user}
+    fotoHabilitada={!!process.env.R2_BUCKET}
+    usuarioAlias={Astro.locals.user?.alias || Astro.locals.user?.name || ''}
+  />
+</Base>
