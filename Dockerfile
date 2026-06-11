@@ -13,7 +13,9 @@ ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3000
 COPY package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+# --ignore-scripts evita el postinstall de esbuild (conflicto de versiones del
+# binario en una dep transitiva); en runtime no se necesita ningún build script.
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/drizzle ./drizzle
 COPY --from=build /app/scripts ./scripts
