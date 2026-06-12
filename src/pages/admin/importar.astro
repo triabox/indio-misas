@@ -1,0 +1,27 @@
+---
+import Base from '@/layouts/Base.astro';
+import AdminNav from '@/components/AdminNav.astro';
+import ImportarMisas from '@/components/ImportarMisas.tsx';
+---
+
+<Base title="Importar misas — Admin">
+  <section class="admin-wrap">
+    <AdminNav />
+    <h1 class="stencil text-4xl text-hueso">IMPORTAR MISAS</h1>
+    <p class="cond text-xs uppercase tracking-ancho text-hueso-2/60 mt-1 mb-5">
+      Pegá o subí un JSON y se cargan todas de una. No pisa las que ya existen (salvo que lo marques).
+    </p>
+
+    <div class="afiche mb-6 p-4 text-sm text-hueso-2/75 leading-relaxed">
+      <p class="cond uppercase tracking-ancho text-[11px] text-amarillo-luz mb-2">Cómo va el JSON</p>
+      <p>
+        Un objeto <code>{'{ "eventos": [ … ] }'}</code> (o un array directo). Cada misa: <code>titulo</code> (obligatorio),
+        <code>subtitulo</code>, <code>fecha</code>, <code>lugar</code>, <code>ciudad</code>, <code>almasBase</code>,
+        <code>revelado</code> (0–100 %, cuánto arranca el mosaico), <code>imagenObjetivo</code> (URL), <code>panoramica</code> (URL).
+        El <em>slug</em> se genera del título. Tocá <strong>“cargar recitales (1994–2017)”</strong> para traer la lista ya armada.
+      </p>
+    </div>
+
+    <ImportarMisas client:load />
+  </section>
+</Base>
