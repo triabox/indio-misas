@@ -1,0 +1,20 @@
+---
+import Base from '@/layouts/Base.astro';
+import AdminNav from '@/components/AdminNav.astro';
+import ModeracionUsuarios from '@/components/ModeracionUsuarios.tsx';
+import { listarUsuarios } from '@/lib/admin.server';
+
+const usuarios = await listarUsuarios();
+const miId = Astro.locals.user?.id;
+---
+
+<Base title="Usuarios — Admin">
+  <section class="admin-wrap">
+    <AdminNav />
+    <h1 class="stencil text-4xl text-hueso">USUARIOS</h1>
+    <p class="cond text-xs uppercase tracking-ancho text-hueso-2/60 mt-1 mb-5">
+      Bloquear oculta los posts de la persona y le descuenta las almas
+    </p>
+    <ModeracionUsuarios client:load usuarios={usuarios} miId={miId} />
+  </section>
+</Base>

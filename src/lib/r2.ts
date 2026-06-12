@@ -1,6 +1,6 @@
 // Server-only: subida de fotos a Cloudflare R2 vía URL prefirmada (el cliente
 // sube directo a R2, sin pasar los bytes por nuestro server).
-import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const accountId = process.env.R2_ACCOUNT_ID;
@@ -37,4 +37,13 @@ export async function getObject(key: string): Promise<{ body: Uint8Array; conten
   const res = await getClient().send(new GetObjectCommand({ Bucket: bucket, Key: key }));
   const body = await res.Body!.transformToByteArray();
   return { body, contentType: res.ContentType };
+}
+
+export async function deleteObject(key: string): Promise<void> {
+  if (!r2Configurado) return;
+  try {
+    await getClient().send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
+  } catch {
+    // best-effort: si falla, no bloqueamos la moderación
+  }
 }

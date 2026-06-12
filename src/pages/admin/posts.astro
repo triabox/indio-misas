@@ -1,0 +1,17 @@
+---
+import Base from '@/layouts/Base.astro';
+import AdminNav from '@/components/AdminNav.astro';
+import ModeracionPosts from '@/components/ModeracionPosts.tsx';
+import { listarPostsAdmin } from '@/lib/admin.server';
+
+const posts = await listarPostsAdmin(150);
+---
+
+<Base title="Moderación — Admin">
+  <section class="admin-wrap">
+    <AdminNav />
+    <h1 class="stencil text-4xl text-hueso">MODERACIÓN</h1>
+    <p class="cond text-xs uppercase tracking-ancho text-hueso-2/60 mt-1 mb-5">Últimos {posts.length} posts</p>
+    <ModeracionPosts client:load posts={posts} />
+  </section>
+</Base>

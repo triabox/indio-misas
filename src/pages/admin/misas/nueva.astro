@@ -1,0 +1,14 @@
+---
+import Base from '@/layouts/Base.astro';
+import AdminNav from '@/components/AdminNav.astro';
+import EventoForm from '@/components/EventoForm.tsx';
+---
+
+<Base title="Nueva misa — Admin">
+  <section class="admin-wrap">
+    <AdminNav />
+    <a href="/admin/misas" class="cond text-xs uppercase tracking-ancho text-hueso-2/60 hover:text-sangre-viva">← Misas</a>
+    <h1 class="stencil mt-4 text-4xl text-hueso titulo-sangre">NUEVA MISA</h1>
+    <EventoForm client:load />
+  </section>
+</Base>

@@ -62,6 +62,10 @@ if (url) {
   const pool = new pg.Pool({ connectionString: url });
   await migrate(drizzle(pool), { migrationsFolder: './drizzle' });
   for (const e of EVENTOS) await pool.query(INSERT, params(e));
+  if (process.env.ADMIN_EMAIL) {
+    const r = await pool.query('UPDATE "user" SET rol=$1 WHERE email=$2', ['admin', process.env.ADMIN_EMAIL]);
+    console.log(`admin: ${process.env.ADMIN_EMAIL} (${r.rowCount} fila/s)`);
+  }
   await pool.end();
 } else {
   const { PGlite } = await import('@electric-sql/pglite');
@@ -70,6 +74,10 @@ if (url) {
   const client = new PGlite('.pglite');
   await migrate(drizzle(client), { migrationsFolder: './drizzle' });
   for (const e of EVENTOS) await client.query(INSERT, params(e));
+  if (process.env.ADMIN_EMAIL) {
+    await client.query('UPDATE "user" SET rol=$1 WHERE email=$2', ['admin', process.env.ADMIN_EMAIL]);
+    console.log(`admin: ${process.env.ADMIN_EMAIL}`);
+  }
   await client.close();
 }
 

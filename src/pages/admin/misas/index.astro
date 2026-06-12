@@ -1,0 +1,35 @@
+---
+import Base from '@/layouts/Base.astro';
+import AdminNav from '@/components/AdminNav.astro';
+import { listarEventosAdmin } from '@/lib/admin.server';
+import { formatNumero, TIPO_LABEL } from '@/lib/format';
+
+const eventos = await listarEventosAdmin();
+---
+
+<Base title="Misas — Admin">
+  <section class="admin-wrap">
+    <AdminNav />
+    <div class="admin-head">
+      <h1 class="stencil text-4xl text-hueso">MISAS</h1>
+      <a href="/admin/misas/nueva" class="subir-cta admin-cta-inline">+ Nueva</a>
+    </div>
+    <table class="admin-tabla">
+      <thead>
+        <tr><th>Misa</th><th>Tipo</th><th>Almas</th><th>Posts</th><th>Estado</th><th></th></tr>
+      </thead>
+      <tbody>
+        {eventos.map((e) => (
+          <tr>
+            <td><strong>{e.titulo}</strong><br /><span class="admin-sub">{e.slug}</span></td>
+            <td>{TIPO_LABEL[e.tipo]}</td>
+            <td>{formatNumero(e.almasBase + e.asistencias)}</td>
+            <td>{e.posts}</td>
+            <td>{e.publicado ? '✓ pública' : 'oculta'}</td>
+            <td><a href={`/admin/misas/${e.id}`} class="admin-mini">editar</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </section>
+</Base>

@@ -1,0 +1,39 @@
+---
+import Base from '@/layouts/Base.astro';
+import AdminNav from '@/components/AdminNav.astro';
+import { listarEventosAdmin, listarPostsAdmin, listarUsuarios } from '@/lib/admin.server';
+import { formatNumero } from '@/lib/format';
+
+const eventos = await listarEventosAdmin();
+const posts = await listarPostsAdmin(1000);
+const usuarios = await listarUsuarios();
+const almas = eventos.reduce((a, e) => a + e.almasBase + e.asistencias, 0);
+const ocultos = posts.filter((p) => p.estado === 'oculto').length;
+const bloqueados = usuarios.filter((u) => u.bloqueado).length;
+---
+
+<Base title="Admin — MISAS">
+  <section class="admin-wrap">
+    <AdminNav />
+    <h1 class="stencil text-4xl text-hueso titulo-sangre">PANEL</h1>
+    <div class="admin-cards">
+      <a class="admin-card" href="/admin/misas">
+        <span class="admin-card-n">{eventos.length}</span>
+        <span class="admin-card-l">misas</span>
+      </a>
+      <a class="admin-card" href="/admin/posts">
+        <span class="admin-card-n">{posts.length}</span>
+        <span class="admin-card-l">posts{ocultos ? ` · ${ocultos} ocultos` : ''}</span>
+      </a>
+      <a class="admin-card" href="/admin/usuarios">
+        <span class="admin-card-n">{usuarios.length}</span>
+        <span class="admin-card-l">usuarios{bloqueados ? ` · ${bloqueados} bloqueados` : ''}</span>
+      </a>
+      <div class="admin-card">
+        <span class="admin-card-n">{formatNumero(almas)}</span>
+        <span class="admin-card-l">almas</span>
+      </div>
+    </div>
+    <a href="/admin/misas/nueva" class="subir-cta admin-cta-inline">+ Nueva misa</a>
+  </section>
+</Base>
