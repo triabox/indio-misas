@@ -32,6 +32,12 @@ export default function EventoForm({ evento }: { evento?: EventoEdit }) {
   const objRef = useRef<HTMLInputElement>(null);
   const panoRef = useRef<HTMLInputElement>(null);
 
+  // "Arranca revelado (%)" es mucho más claro que el conteo crudo de celdas.
+  // Se guarda como reveladoBase = pct% de meta. Misas nuevas arrancan en 40%.
+  const pctDe = (ev?: EventoEdit) =>
+    ev?.meta ? Math.max(0, Math.min(100, Math.round((ev.reveladoBase / ev.meta) * 100))) : 0;
+  const [pct, setPct] = useState<number>(evento?.id ? pctDe(evento) : 40);
+
   const set = (k: keyof EventoEdit, v: unknown) => setF((p) => ({ ...p, [k]: v }));
 
   async function subir(file: File, campo: 'imagenObjetivo' | 'panoramica') {
@@ -51,10 +57,11 @@ export default function EventoForm({ evento }: { evento?: EventoEdit }) {
     setError('');
     setGuardando(true);
     try {
+      const reveladoBase = Math.round((Math.max(0, Math.min(100, pct)) / 100) * (f.meta || 0));
       const res = await fetch(editar ? `/api/admin/eventos/${evento!.id}` : '/api/admin/eventos', {
         method: editar ? 'PATCH' : 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify(f),
+        body: JSON.stringify({ ...f, reveladoBase }),
       });
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(d.error || 'No se pudo guardar.');
@@ -93,13 +100,18 @@ export default function EventoForm({ evento }: { evento?: EventoEdit }) {
         <label>Lugar<input className="subir-input" value={f.lugar} onChange={(e) => set('lugar', e.target.value)} /></label>
         <label>Ciudad<input className="subir-input" value={f.ciudad} onChange={(e) => set('ciudad', e.target.value)} /></label>
       </div>
+      <label>Almas base <span className="admin-ayuda">— el número grande del contador (cuánta gente fue)</span>
+        <input type="number" className="subir-input" value={f.almasBase} onChange={(e) => set('almasBase', +e.target.value)} />
+      </label>
+      <label className="admin-revelado">
+        <span>Arranca revelado: <strong className="text-sangre-viva">{pct}%</strong> <span className="admin-ayuda">— cuánto del mosaico se ve a color al empezar</span></span>
+        <input type="range" min={0} max={100} value={pct} onChange={(e) => setPct(+e.target.value)} />
+      </label>
       <div className="admin-row">
-        <label>Almas base<input type="number" className="subir-input" value={f.almasBase} onChange={(e) => set('almasBase', +e.target.value)} /></label>
-        <label>Revelado base<input type="number" className="subir-input" value={f.reveladoBase} onChange={(e) => set('reveladoBase', +e.target.value)} /></label>
-      </div>
-      <div className="admin-row">
-        <label>Meta (caras)<input type="number" className="subir-input" value={f.meta} onChange={(e) => set('meta', +e.target.value)} /></label>
-        <label>Orden<input type="number" className="subir-input" value={f.orden} onChange={(e) => set('orden', +e.target.value)} /></label>
+        <label>Caras para llenarlo <span className="admin-ayuda">(almas nuevas para revelarlo del todo)</span>
+          <input type="number" className="subir-input" value={f.meta} onChange={(e) => set('meta', +e.target.value)} /></label>
+        <label>Orden <span className="admin-ayuda">(0 = primero)</span>
+          <input type="number" className="subir-input" value={f.orden} onChange={(e) => set('orden', +e.target.value)} /></label>
       </div>
 
       <label>Imagen objetivo (URL o subila)

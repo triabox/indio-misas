@@ -1273,3 +1273,23 @@ a.admin-card:hover {
   padding: 32px 24px;
   margin-top: 28px;
 }
+
+/* Ayuda inline en el form de admin */
+.admin-ayuda {
+  font-family: 'Archivo', sans-serif;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+  font-weight: 400;
+  color: rgba(232, 226, 208, 0.45);
+}
+.admin-revelado {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.admin-revelado input[type='range'] {
+  width: 100%;
+  accent-color: #c1121f;
+  cursor: pointer;
+}
