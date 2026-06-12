@@ -2,6 +2,7 @@
 import Base from '@/layouts/Base.astro';
 import EventoCard from '@/components/EventoCard.astro';
 import ContadorAlmas from '@/components/ContadorAlmas.tsx';
+import Compartir from '@/components/Compartir.tsx';
 import { listarEventos } from '@/lib/eventos.server';
 
 const eventos = await listarEventos();
@@ -80,5 +81,21 @@ const almasGlobales = eventos.reduce((acc, e) => acc + e.almas, 0);
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {eventos.map((e) => <EventoCard evento={e} />)}
     </div>
+  </section>
+
+  <!-- ===================== CORRÉ LA VOZ ===================== -->
+  <section class="mx-auto max-w-5xl px-5 pb-20 pt-4 text-center">
+    <h2 class="stencil text-3xl text-hueso sm:text-4xl">CORRÉ LA VOZ</h2>
+    <p class="cond mt-1 mb-7 text-xs uppercase tracking-ancho text-hueso-2/60">
+      Mandáselo a tu banda. El que estuvo, tiene que estar acá.
+    </p>
+    <Compartir
+      client:visible
+      url={Astro.url.origin + '/'}
+      titulo="El archivo del Indio"
+      almas={almasGlobales}
+      variante="archivo"
+      imagen="https://upload.wikimedia.org/wikipedia/commons/b/bd/Indio_solari.jpg"
+    />
   </section>
 </Base>

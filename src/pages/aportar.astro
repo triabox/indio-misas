@@ -1,0 +1,73 @@
+---
+import Base from '@/layouts/Base.astro';
+import Compartir from '@/components/Compartir.tsx';
+import { almasGlobales } from '@/lib/eventos.server';
+import { formatNumero } from '@/lib/format';
+
+const cafecito = process.env.CAFECITO_URL || 'https://cafecito.app/misas';
+const almas = await almasGlobales();
+---
+
+<Base
+  title="Aportá al archivo — MISAS"
+  description="MISAS es un proyecto de fans, sin fines de lucro. Si te suma, bancá el servidor y el almacenamiento con un cafecito."
+>
+  <section class="aportar-wrap">
+    <span class="sello inline-block px-3 py-1 text-xs text-amarillo-luz">Sin fines de lucro</span>
+    <h1 class="stencil mt-5 text-5xl leading-none text-hueso sm:text-6xl">
+      BANCÁ <span class="text-sangre-viva">EL ARCHIVO</span>
+    </h1>
+    <p class="cond mx-auto mt-4 max-w-xl text-base leading-relaxed text-hueso-2/80">
+      MISAS no se vende ni tiene publicidad. Es un lugar para guardar, entre todos, la memoria de
+      los que fueron a ver al Indio.
+      <span class="text-hueso">Ya somos {formatNumero(almas)} almas.</span>
+    </p>
+
+    <div class="aportar-card">
+      <p class="cond text-xs uppercase tracking-ancho text-hueso-2/55">A dónde va tu aporte</p>
+      <ul class="mx-auto mt-4 max-w-md space-y-3 text-left text-sm text-hueso-2/80">
+        <li class="flex gap-3">
+          <span class="text-sangre-viva">▹</span>
+          <span><strong class="text-hueso">El servidor</strong> donde vive la web, para que esté siempre prendida.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="text-sangre-viva">▹</span>
+          <span><strong class="text-hueso">El almacenamiento</strong> de las fotos que sube la gente — y queremos que entren millones.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="text-sangre-viva">▹</span>
+          <span><strong class="text-hueso">Seguir sumando misas</strong> y mejoras, sin cobrarle a nadie.</span>
+        </li>
+      </ul>
+
+      <div class="mt-8 flex flex-col items-center gap-3">
+        <a class="cafecito-btn" href={cafecito} target="_blank" rel="noopener noreferrer">
+          ☕ Invitame un cafecito
+        </a>
+        <p class="text-[11px] text-hueso-2/40">Vía Cafecito · con tarjeta o dinero en cuenta · es seguro</p>
+      </div>
+    </div>
+
+    <div class="mt-12">
+      <p class="cond text-xs uppercase tracking-ancho text-hueso-2/55">
+        ¿No podés aportar? Sumás igual compartiendo
+      </p>
+      <div class="mt-5">
+        <Compartir
+          client:visible
+          url={new URL('/', Astro.url.origin).href}
+          titulo="El archivo del Indio"
+          almas={almas}
+          variante="archivo"
+          imagen="https://upload.wikimedia.org/wikipedia/commons/b/bd/Indio_solari.jpg"
+        />
+      </div>
+    </div>
+
+    <p class="mt-12">
+      <a href="/" class="cond text-xs uppercase tracking-ancho text-hueso-2/60 transition-colors hover:text-sangre-viva">
+        ← Volver al archivo
+      </a>
+    </p>
+  </section>
+</Base>

@@ -5,12 +5,29 @@ import SesionNav from '@/components/SesionNav.tsx';
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
+  ogType?: string;
 }
 
 const {
   title = 'MISAS — el archivo de los que estuvieron',
   description = 'Subí tu foto, contá tu historia y sumate al mosaico de los que fueron a ver al Indio. Acá nadie estuvo solo.',
+  image,
+  ogType = 'website',
 } = Astro.props;
+
+// URLs absolutas para las tarjetas de redes (og:/twitter:).
+const origin = Astro.url.origin;
+const canonical = Astro.url.href;
+const DEFAULT_OG = 'https://upload.wikimedia.org/wikipedia/commons/b/bd/Indio_solari.jpg';
+const ogImage = image
+  ? image.startsWith('http')
+    ? image
+    : new URL(image, origin).href
+  : DEFAULT_OG;
+
+// Link de aporte (Cafecito). Se configura por env en Easypanel, sin rebuild.
+const cafecito = process.env.CAFECITO_URL || 'https://cafecito.app/misas';
 ---
 
 <!doctype html>
@@ -21,7 +38,23 @@ const {
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0a0a0a" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={canonical} />
     <title>{title}</title>
+
+    <!-- Open Graph / redes -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="MISAS" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:alt" content={title} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -49,8 +82,21 @@ const {
       <div class="mx-auto max-w-6xl px-5 py-10 text-center">
         <p class="stencil text-2xl text-hueso/80">NADIE SE VA DEL TODO</p>
         <hr class="divisor-pintado my-5 mx-auto max-w-xs" />
+
+        <div class="footer-aporte">
+          <p class="cond text-xs uppercase tracking-ancho text-hueso-2/60">
+            El archivo lo sostenemos entre todos
+          </p>
+          <a class="cafecito-btn" href={cafecito} target="_blank" rel="noopener noreferrer">
+            ☕ Invitame un cafecito
+          </a>
+          <a href="/aportar" class="cond text-[11px] uppercase tracking-ancho text-hueso-2/45 underline-offset-4 hover:text-amarillo-luz hover:underline">
+            ¿Por qué aportar? →
+          </a>
+        </div>
+
         <p class="cond text-xs uppercase tracking-ancho text-hueso-2/60">
-          Proyecto de fans · prototipo · sin fines comerciales
+          Proyecto de fans · sin fines de lucro
         </p>
         <p class="mt-2 text-xs text-hueso-2/40 max-w-xl mx-auto leading-relaxed">
           Recitales, fechas y lugares reales (cifras de convocatoria aproximadas, varían según la

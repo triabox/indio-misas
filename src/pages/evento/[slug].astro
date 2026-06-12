@@ -5,8 +5,9 @@ import Panoramica from '@/components/Panoramica.tsx';
 import MuroHistorias from '@/components/MuroHistorias.tsx';
 import ContadorAlmas from '@/components/ContadorAlmas.tsx';
 import SubirModal from '@/components/SubirModal.tsx';
+import Compartir from '@/components/Compartir.tsx';
 import { getEventoConPosts } from '@/lib/eventos.server';
-import { TIPO_LABEL } from '@/lib/format';
+import { TIPO_LABEL, formatNumero } from '@/lib/format';
 import { resolveImagen } from '@/lib/resolveImagen';
 
 const { slug } = Astro.params;
@@ -16,9 +17,23 @@ if (!data) {
 }
 const { evento, fotos } = data;
 const imagenObjetivo = resolveImagen(evento.slug, evento.imagenObjetivo);
+
+// Foto real (absoluta) para la tarjeta de redes y la imagen de historia.
+// Si el evento no tiene imagen propia, dejamos undefined → Base usa el OG por defecto.
+const ogImagen = imagenObjetivo
+  ? imagenObjetivo.startsWith('http')
+    ? imagenObjetivo
+    : new URL(imagenObjetivo, Astro.url.origin).href
+  : undefined;
+const ogDescripcion = `${formatNumero(evento.almas)} almas estuvieron en ${evento.titulo} · ${evento.lugar}, ${evento.ciudad}. Sumá la tuya al archivo del Indio.`;
 ---
 
-<Base title={`${evento.titulo} — MISAS`} description={`${evento.titulo} · ${evento.lugar}, ${evento.ciudad}. ${evento.subtitulo}.`}>
+<Base
+  title={`${evento.titulo} — MISAS`}
+  description={ogDescripcion}
+  image={ogImagen}
+  ogType="article"
+>
   <!-- back -->
   <div class="mx-auto max-w-5xl px-5 pt-6">
     <a href="/" class="cond text-xs uppercase tracking-ancho text-hueso-2/60 transition-colors hover:text-sangre-viva">
@@ -85,6 +100,25 @@ const imagenObjetivo = resolveImagen(evento.slug, evento.imagenObjetivo);
       slug={evento.slug}
       fotos={fotos}
       almas={evento.almas}
+    />
+  </section>
+
+  <!-- ===================== COMPARTIR ===================== -->
+  <section class="mx-auto max-w-5xl px-5 pb-24 text-center">
+    <hr class="divisor-pintado mb-10 mx-auto max-w-md" />
+    <h2 class="stencil text-3xl text-hueso sm:text-4xl">LLEVALA A LA CALLE</h2>
+    <p class="cond mt-1 mb-7 text-xs uppercase tracking-ancho text-hueso-2/60">
+      Cuantos más sepan, más grande la multitud. Compartí esta misa.
+    </p>
+    <Compartir
+      client:visible
+      url={Astro.url.href}
+      titulo={evento.titulo}
+      almas={evento.almas}
+      imagen={ogImagen}
+      lugar={evento.lugar}
+      ciudad={evento.ciudad}
+      fecha={evento.fecha}
     />
   </section>
 
