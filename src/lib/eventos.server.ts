@@ -15,8 +15,7 @@ export interface EventoVM extends EventoRow {
 export function urlDeImagen(key: string | null | undefined): string {
   if (!key) return '';
   if (key.startsWith('http')) return key; // URL directa (imágenes libres / legacy)
-  const base = process.env.PUBLIC_R2_URL ?? '';
-  return `${base.replace(/\/$/, '')}/${key}`;
+  return `/api/img/${key}`; // servidas por el proxy desde R2
 }
 
 async function asistenciasPorEvento(): Promise<Map<string, number>> {

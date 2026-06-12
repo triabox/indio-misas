@@ -91,19 +91,13 @@ export default function SubirModal({ slug, panoramica, logueado, fotoHabilitada,
     try {
       let imagenKey: string | null = null;
       if (!esRecuerdo && archivo) {
-        const up = await fetch('/api/upload-url', {
+        const up = await fetch('/api/upload', {
           method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ contentType: archivo.type }),
-        });
-        const updata = await up.json().catch(() => ({}));
-        if (!up.ok) throw new Error(updata.error || 'No se pudo preparar la subida.');
-        const put = await fetch(updata.url, {
-          method: 'PUT',
           headers: { 'content-type': archivo.type },
           body: archivo,
         });
-        if (!put.ok) throw new Error('No se pudo subir la foto.');
+        const updata = await up.json().catch(() => ({}));
+        if (!up.ok) throw new Error(updata.error || 'No se pudo subir la foto.');
         imagenKey = updata.key;
       }
       const res = await fetch('/api/posts', {
